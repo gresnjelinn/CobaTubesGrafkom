@@ -171,15 +171,15 @@ var colorsBox = new THREE.Color( 0xffffff );
 
 boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsBox, 3 ) );
 
-for ( let i = 0; i < 500; i ++ ) {
+for ( let i = 0; i < 1000; i ++ ) {
 
     var boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
     boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
 
     var box = new THREE.Mesh( boxGeometry, boxMaterial );
-    box.position.x = Math.floor( Math.random() * 20 - 10 ) * 20;
-    box.position.y = Math.floor( Math.random() * 20 ) * 20 + 10;
-    box.position.z = Math.floor( Math.random() * 20 - 10 ) * 20;
+    box.position.x = Math.floor( Math.random() * 50 - 10 ) * 50;
+    box.position.y = Math.floor( Math.random() * 20 ) * 20 + 5;
+    box.position.z = Math.floor( Math.random() * 50 - 10 ) * 50;
 
     scene.add( box );
     objects.push( box );
