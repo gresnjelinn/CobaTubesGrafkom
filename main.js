@@ -126,7 +126,6 @@ raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1,
 // floor
 
 var floorGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
-floorGeometry.rotateX( - Math.PI / 2 );
 
 // vertex displacement
 
@@ -156,7 +155,7 @@ for ( let i = 0, l = position.count; i < l; i ++ ) {
 
 }
 
-floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsFloor, 3 ) );
+floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsFloor ) );
 
 var floorMaterial = new THREE.MeshBasicMaterial( { vertexColors: true } );
 
@@ -168,14 +167,7 @@ scene.add( floor );
 var boxGeometry = new THREE.BoxGeometry( 20, 20, 20 ).toNonIndexed();
 
 position = boxGeometry.attributes.position;
-var colorsBox = [];
-
-for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-    colorsBox.push( color.r, color.g, color.b );
-
-}
+var colorsBox = new THREE.Color( 0xffffff );
 
 boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsBox, 3 ) );
 
