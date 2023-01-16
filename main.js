@@ -157,14 +157,12 @@ for (let i = 0; i < 1000; i++) {
     sphere.position.x = Math.floor(Math.random() * 50 - 10) * 50;
     sphere.position.y = 10;
     sphere.position.z = Math.floor(Math.random() * 50 - 10) * 50;
-    scene.add(sphere);
     spheres.push(sphere);
 
     var sphereAtas = new THREE.Mesh(sphereGeometry, sphereMaterial);
     sphereAtas.position.x = xBawah;
     sphereAtas.position.y = 25;
     sphereAtas.position.z = zBawah;
-    scene.add(sphereAtas);
     spheres.push(sphereAtas);
 }
 
@@ -183,6 +181,10 @@ function draw() {
 
     var time = performance.now();
 
+    for (let i = 0; i < spheres.length; i++) {
+        scene.add(spheres[i]);
+    }
+
     if (controls.isLocked == true) {
 
         raycaster.ray.origin.copy(controls.getObject().position);
@@ -196,9 +198,17 @@ function draw() {
 
         var intersections2 = raycaster.intersectObjects(spheres, true);
         var onObject2 = intersections2.length > 0;
-
         if (onObject2 == true) {
-            console.log("HAI!!");
+            if (intersections2[1] != undefined) {
+                for (let i = 0; i < spheres.length; i++) {
+                    if (intersections2[1].object == spheres[i]) {
+                        console.log(i);
+                        scene.remove(spheres[i]);
+                        spheres.splice(i, 1);
+                    }
+                }
+                // console.log("HAI!!");
+            }
         }
 
         var delta = (time - prevTime) / 800;
@@ -210,7 +220,7 @@ function draw() {
 
         direction.z = Number(moveForward) - Number(moveBackward);
         direction.x = Number(moveRight) - Number(moveLeft);
-        direction.normalize(); 
+        direction.normalize();
 
         if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
         if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
@@ -223,7 +233,7 @@ function draw() {
         controls.moveRight(- velocity.x * delta);
         controls.moveForward(- velocity.z * delta);
 
-        controls.getObject().position.y += (velocity.y * delta); 
+        controls.getObject().position.y += (velocity.y * delta);
 
         if (controls.getObject().position.y < 10) {
 
