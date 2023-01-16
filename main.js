@@ -1,21 +1,22 @@
 var scene = new THREE.Scene();
-scene.background = new THREE.Color( 0xffffff );
-scene.fog = new THREE.Fog( 0xffffff, 0, 750 );
+scene.background = new THREE.Color(0xffffff);
+scene.fog = new THREE.Fog(0xffffff, 0, 750);
 
-var light = new THREE.HemisphereLight( 0xeeeeff, 0x777788, 0.75 );
-light.position.set( 0.5, 1, 0.75 );
-scene.add( light );
+var light = new THREE.HemisphereLight(0xeeeeee, 0x888888, 0.8);
+light.position.set(1, 1, 1);
+scene.add(light);
 
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1000 );
+var camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 1000);
 camera.position.y = 10;
 
-var renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setPixelRatio( window.devicePixelRatio );
-renderer.setSize( window.innerWidth, window.innerHeight );
-document.body.appendChild( renderer.domElement );
-window.addEventListener( 'resize', onWindowResize );
+var renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
+window.addEventListener('resize', onWindowResize);
 
-var objects = [];
+var boxes = [];
+var spheres = [];
 var raycaster;
 var moveForward = false;
 var moveBackward = false;
@@ -23,43 +24,39 @@ var moveLeft = false;
 var moveRight = false;
 var canJump = false;
 
-var prevTime = performance.now();
+// var prevTime = performance.now();
 var velocity = new THREE.Vector3();
 var direction = new THREE.Vector3();
 var vertex = new THREE.Vector3();
 var color = new THREE.Color();
 
-var controls = new THREE.PointerLockControls( camera, document.body );
-var blocker = document.getElementById( 'blocker' );
-var instructions = document.getElementById( 'instructions' );
+var controls = new THREE.PointerLockControls(camera, document.body);
+var blocker = document.getElementById('blocker');
+var instructions = document.getElementById('instructions');
 
 if (instructions) {
-    instructions.addEventListener( 'click', function () {
+    instructions.addEventListener('click', function () {
 
         controls.lock();
-    
-    } );
+
+    });
 }
 
-controls.addEventListener( 'lock', function () {
-
+controls.addEventListener('lock', function () {
     instructions.style.display = 'none';
     blocker.style.display = 'none';
+});
 
-} );
-
-controls.addEventListener( 'unlock', function () {
-
+controls.addEventListener('unlock', function () {
     blocker.style.display = 'block';
     instructions.style.display = '';
+});
 
-} );
+scene.add(controls.getObject());
 
-scene.add( controls.getObject() );
+var onKeyDown = function (event) {
 
-var onKeyDown = function ( event ) {
-
-    switch ( event.code ) {
+    switch (event.code) {
 
         case 'ArrowUp':
         case 'KeyW':
@@ -82,7 +79,7 @@ var onKeyDown = function ( event ) {
             break;
 
         case 'Space':
-            if ( canJump === true ) velocity.y += 350;
+            if (canJump == true) velocity.y += 350;
             canJump = false;
             break;
 
@@ -90,9 +87,9 @@ var onKeyDown = function ( event ) {
 
 };
 
-var onKeyUp = function ( event ) {
+var onKeyUp = function (event) {
 
-    switch ( event.code ) {
+    switch (event.code) {
 
         case 'ArrowUp':
         case 'KeyW':
@@ -118,127 +115,117 @@ var onKeyUp = function ( event ) {
 
 };
 
-document.addEventListener( 'keydown', onKeyDown );
-document.addEventListener( 'keyup', onKeyUp );
+document.addEventListener('keydown', onKeyDown);
+document.addEventListener('keyup', onKeyUp);
 
-raycaster = new THREE.Raycaster( new THREE.Vector3(), new THREE.Vector3( 0, - 1, 0 ), 0, 10 );
+raycaster = new THREE.Raycaster(new THREE.Vector3(), new THREE.Vector3(0, - 1, 0), 0, 10);
 
-// floor
-
-var floorGeometry = new THREE.PlaneGeometry( 2000, 2000, 100, 100 );
-
-// vertex displacement
-
-var position = floorGeometry.attributes.position;
-
-for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    vertex.fromBufferAttribute( position, i );
-
-    vertex.x += Math.random() * 20 - 10;
-    vertex.y += Math.random() * 2;
-    vertex.z += Math.random() * 20 - 10;
-
-    position.setXYZ( i, vertex.x, vertex.y, vertex.z );
-
-}
-
-floorGeometry = floorGeometry.toNonIndexed(); // ensure each face has unique vertices
-
-position = floorGeometry.attributes.position;
-var colorsFloor = [];
-
-for ( let i = 0, l = position.count; i < l; i ++ ) {
-
-    color.setHSL( Math.random() * 0.3 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
-    colorsFloor.push( color.r, color.g, color.b );
-
-}
-
-floorGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsFloor ) );
-
-var floorMaterial = new THREE.MeshBasicMaterial( { vertexColors: true } );
-
-var floor = new THREE.Mesh( floorGeometry, floorMaterial );
-scene.add( floor );
+const ground = new THREE.Mesh(new THREE.PlaneGeometry(10000, 10000).applyMatrix4(new THREE.Matrix4().makeRotationX(Math.PI / 2)), new THREE.MeshStandardMaterial({ side: THREE.DoubleSide }));
+scene.add(ground);
 
 // objects
 
-var boxGeometry = new THREE.BoxGeometry( 20, 20, 20 ).toNonIndexed();
+var boxGeometry = new THREE.BoxGeometry(20, 20, 20);
 
 position = boxGeometry.attributes.position;
-var colorsBox = new THREE.Color( 0xffffff );
+var colorsBox = new THREE.Color(0x000000);
 
-boxGeometry.setAttribute( 'color', new THREE.Float32BufferAttribute( colorsBox, 3 ) );
+var boxMaterial = new THREE.MeshBasicMaterial({ vertexColors: true });
+var sphereGeometry = new THREE.SphereGeometry(5, 5, 5);
+var sphereMaterial = new THREE.MeshBasicMaterial({ color: 'rgb(88, 199, 115)' });
 
-for ( let i = 0; i < 1000; i ++ ) {
+for (let i = 0; i < 1000; i++) {
+    var boxAtas = new THREE.Mesh(boxGeometry, boxMaterial);
+    boxAtas.position.x = Math.floor(Math.random() * 50 - 10) * 50;
+    boxAtas.position.y = Math.floor(Math.random() * 20) * 20 + 5;
+    boxAtas.position.z = Math.floor(Math.random() * 50 - 10) * 50;
 
-    var boxMaterial = new THREE.MeshPhongMaterial( { specular: 0xffffff, flatShading: true, vertexColors: true } );
-    boxMaterial.color.setHSL( Math.random() * 0.2 + 0.5, 0.75, Math.random() * 0.25 + 0.75 );
+    var xBawah = Math.floor(Math.random() * 50) * 100;
+    var zBawah = Math.floor(Math.random() * 50 - 10) * 75;
 
-    var box = new THREE.Mesh( boxGeometry, boxMaterial );
-    box.position.x = Math.floor( Math.random() * 50 - 10 ) * 50;
-    box.position.y = Math.floor( Math.random() * 20 ) * 20 + 5;
-    box.position.z = Math.floor( Math.random() * 50 - 10 ) * 50;
+    var boxBawah = new THREE.Mesh(boxGeometry, boxMaterial);
+    boxBawah.position.x = xBawah;
+    boxBawah.position.y = 10;
+    boxBawah.position.z = zBawah;
 
-    scene.add( box );
-    objects.push( box );
+    scene.add(boxAtas);
+    boxes.push(boxAtas);
+    scene.add(boxBawah);
+    boxes.push(boxBawah);
 
+    var sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphere.position.x = Math.floor(Math.random() * 50 - 10) * 50;
+    sphere.position.y = 10;
+    sphere.position.z = Math.floor(Math.random() * 50 - 10) * 50;
+    scene.add(sphere);
+    spheres.push(sphere);
+
+    var sphereAtas = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphereAtas.position.x = xBawah;
+    sphereAtas.position.y = 25;
+    sphereAtas.position.z = zBawah;
+    scene.add(sphereAtas);
+    spheres.push(sphereAtas);
 }
-
-//
 
 function onWindowResize() {
 
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
 
-    renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.setSize(window.innerWidth, window.innerHeight);
 
 }
 
 
 function draw() {
-    requestAnimationFrame( draw );
+    requestAnimationFrame(draw);
 
     var time = performance.now();
 
-    if ( controls.isLocked === true ) {
+    if (controls.isLocked == true) {
 
-        raycaster.ray.origin.copy( controls.getObject().position );
+        raycaster.ray.origin.copy(controls.getObject().position);
         raycaster.ray.origin.y -= 10;
 
-        var intersections = raycaster.intersectObjects( objects, false );
-
+        var intersections = raycaster.intersectObjects(boxes, false);
         var onObject = intersections.length > 0;
 
-        var delta = ( time - prevTime ) / 1000;
+        raycaster.ray.origin.copy(controls.getObject().position);
+        raycaster.ray.origin.y += 10;
+
+        var intersections2 = raycaster.intersectObjects(spheres, true);
+        var onObject2 = intersections2.length > 0;
+
+        if (onObject2 == true) {
+            console.log("HAI!!");
+        }
+
+        var delta = (time - prevTime) / 800;
 
         velocity.x -= velocity.x * 10.0 * delta;
         velocity.z -= velocity.z * 10.0 * delta;
 
         velocity.y -= 9.8 * 100.0 * delta; // 100.0 = mass
 
-        direction.z = Number( moveForward ) - Number( moveBackward );
-        direction.x = Number( moveRight ) - Number( moveLeft );
-        direction.normalize(); // this ensures consistent movements in all directions
+        direction.z = Number(moveForward) - Number(moveBackward);
+        direction.x = Number(moveRight) - Number(moveLeft);
+        direction.normalize(); 
 
-        if ( moveForward || moveBackward ) velocity.z -= direction.z * 400.0 * delta;
-        if ( moveLeft || moveRight ) velocity.x -= direction.x * 400.0 * delta;
+        if (moveForward || moveBackward) velocity.z -= direction.z * 400.0 * delta;
+        if (moveLeft || moveRight) velocity.x -= direction.x * 400.0 * delta;
 
-        if ( onObject === true ) {
-
-            velocity.y = Math.max( 0, velocity.y );
+        if (onObject == true) {
+            velocity.y = Math.max(0, velocity.y);
             canJump = true;
-
         }
 
-        controls.moveRight( - velocity.x * delta );
-        controls.moveForward( - velocity.z * delta );
+        controls.moveRight(- velocity.x * delta);
+        controls.moveForward(- velocity.z * delta);
 
-        controls.getObject().position.y += ( velocity.y * delta ); // new behavior
+        controls.getObject().position.y += (velocity.y * delta); 
 
-        if ( controls.getObject().position.y < 10 ) {
+        if (controls.getObject().position.y < 10) {
 
             velocity.y = 0;
             controls.getObject().position.y = 10;
@@ -251,7 +238,11 @@ function draw() {
 
     prevTime = time;
 
-    renderer.render( scene, camera );
+    renderer.render(scene, camera);
+
+    // if (moveForward == true) {
+    //     console.log(velocity);
+    // }
 }
 
 draw();

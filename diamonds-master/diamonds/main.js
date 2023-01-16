@@ -22,7 +22,7 @@ async function main() {
     const clientHeight = window.innerHeight * 0.98;
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(75, clientWidth / clientHeight, 0.1, 1000);
-    camera.position.set(50, 75, 50);
+    camera.position.set(50, 20, 50);
     const renderer = new THREE.WebGLRenderer();
     renderer.setSize(clientWidth, clientHeight);
     document.body.appendChild(renderer.domElement);
@@ -228,23 +228,9 @@ async function main() {
     composer.addPass(effectPass);
     composer.addPass(new ShaderPass(GammaCorrectionShader));
     composer.addPass(smaaPass);
-    const effectController = {
-        bounces: 3.0,
-        ior: 2.4,
-        correctMips: true,
-        chromaticAberration: true,
-        aberrationStrength: 0.01
-    };
 
     function animate() {
-        diamond.material.uniforms.bounces.value = effectController.bounces;
-        diamond.material.uniforms.ior.value = effectController.ior;
-        diamond.material.uniforms.correctMips.value = effectController.correctMips;
-        diamond.material.uniforms.chromaticAberration.value = effectController.chromaticAberration;
-        diamond.material.uniforms.aberrationStrength.value = effectController.aberrationStrength;
         diamond.rotation.y += 0.01;
-        diamond.updateMatrix();
-        diamond.updateMatrixWorld();
         renderer.setRenderTarget(defaultTexture);
         renderer.clear();
         renderer.render(scene, camera);
