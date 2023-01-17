@@ -89,3 +89,15 @@ a, button, input, select {
 	margin-top: 20px;
 	padding: 10px;
 }
+
+#overlay {
+	width: 100px;
+	height: 100px;
+	position: absolute;
+	top: 0;
+	left: 0;
+  }
+
+#point {
+	font-size: xx-large;
+}

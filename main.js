@@ -256,3 +256,28 @@ function draw() {
 }
 
 draw();
+
+
+// app.get('/index', function(req, res) {
+
+//     var name = 'hello';
+  
+//     res.render(__dirname + "/index.html", {name:name});
+  
+//   });
+
+
+// Text Geometry
+// var textGeo = new THREE.TextGeometry("Score: 0", {
+//     // font: new THREE.Font(fontJSON),
+//     size: 10,
+//     height: 0.1,
+//     curveSegments: 12,
+//     bevelEnabled: true,
+//     bevelThickness: 0.1,
+//     bevelSize: 0.1
+//   });
+//   var textMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+//   scoreText = new THREE.Mesh(textGeo, textMaterial);
+//   scoreText.position.set(5, 10, 0);
+//   scene.add(scoreText);
